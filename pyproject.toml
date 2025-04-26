@@ -4,4 +4,11 @@ version = "0.1.0"
 description = "Add your description here"
 readme = "README.md"
 requires-python = ">=3.11"
-dependencies = []
+dependencies = [
+    "aiosqlite>=0.21.0",
+    "fastapi[standard]>=0.115.12",
+    "pydantic>=2.11.3",
+    "sqlalchemy>=2.0.40",
+    "strawberry-graphql[fastapi]>=0.266.0",
+    "uvicorn[standard]>=0.34.2",
+]
