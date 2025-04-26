@@ -1,0 +1,1 @@
+# try_fastapi_sqlalchemy_strawberry
