@@ -22,12 +22,12 @@ async def get_graphql_context(db: AsyncSession = Depends(get_db)) -> ContextData
   return ContextData(db=db)
 
 
-@strawberry.experimental.pydantic.type(model=schemas.ItemRead, all_fields=True):
+@strawberry.experimental.pydantic.type(model=schemas.ItemRead, all_fields=True)
 class ItemType:
   pass
 
 
-@strawberry.experimental.pydantic.input(model=schemas.ItemCreate, all_fields=True):
+@strawberry.experimental.pydantic.input(model=schemas.ItemCreate, all_fields=True)
 class ItemInput:
   pass
 
