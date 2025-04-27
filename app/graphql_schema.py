@@ -51,7 +51,7 @@ class Query:
       return None
     return item_db
   
-  @strawberry.field
+  @strawberry.type
   class Mutation:
     @strawberry.mutation
     async def add_item(self, info: Context, item: ItemInput) -> ItemType:
@@ -75,7 +75,7 @@ class Query:
 schemas = strawberry.Schema(query=Query, mutation=Query.Mutation)
 
 graphql_app = GraphQLRouter(
-    schema,
+    schemas,
     context_getter=get_graphql_context,
     graphiql=True,  # GraphiQL UIを有効にする場合はコメントアウトを外す
 )
