@@ -5,6 +5,7 @@ from contextlib import asynccontextmanager
 
 from . import crud, models, schemas, database
 from .database import engine, Base, get_db
+from .graphql_schema import graphql_app
 
 
 @asynccontextmanager
@@ -18,6 +19,8 @@ async def lifespan(app: FastAPI):
       yield
 
 app = FastAPI(lifespan=lifespan)
+
+app.include_router(graphql_app, prefix="/graphql")
 
 
 @app.post("/items/", response_model=schemas.ItemRead, status_code=201)
@@ -53,4 +56,3 @@ async def update_item_endpoint(item_id: int, item_update: schemas.ItemCreate, db
     if db_updated_item is None:
         raise HTTPException(status_code=404, detail="Item not found")
     return db_updated_item
-
