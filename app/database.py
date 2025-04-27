@@ -6,7 +6,11 @@ from typing import AsyncGenerator
 SQLALCHEMY_DATABASE_URL = "sqlite+aiosqlite:///./test.db"
 
 # 非同期エンジン
-engine = create_async_engine(SQLALCHEMY_DATABASE_URL, connection_args={"check_same_thread": False}, echo=True)
+engine = create_async_engine(
+   SQLALCHEMY_DATABASE_URL,
+  #  connection_args={"check_same_thread": False},
+   echo=True
+)
 
 
 # 非同期セッションファクトリ
