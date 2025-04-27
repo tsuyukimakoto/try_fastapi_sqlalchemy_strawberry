@@ -39,9 +39,9 @@ class Query:
     db = info.context.db
     items_db = await crud.get_items(db=db, skip=skip, limit=limit)
     
-    #return [ItemType.from_pydantic(item) for item in items_db]
-    # pydantic連携で、ORMインスタンスが自動的にItemTypeに変換される
-    return items_db
+    return [ItemType.from_pydantic(item) for item in items_db]
+    # pydantic連携で、ORMインスタンスが自動的にItemTypeに変換される、とのことだったがそんなことはなかった
+    # return items_db
 
   @strawberry.field
   async def item(self, info: Context, item_id: int) -> Optional[ItemType]:
@@ -49,16 +49,22 @@ class Query:
     item_db = await crud.get_item(db=db, item_id=item_id)
     if item_db is None:
       return None
-    return item_db
+    return ItemType.from_pydantic(item_db)
+
+  @strawberry.field
+  async def items(self, info: Context, skip: int = 0, limit: int = 10) -> List[ItemType]:
+    db = info.context.db
+    items_db = await crud.get_items(db=db, skip=skip, limit=limit)
+    return [ItemType.from_pydantic(item) for item in items_db]
   
   @strawberry.type
   class Mutation:
     @strawberry.mutation
     async def add_item(self, info: Context, item: ItemInput) -> ItemType:
       db = info.context.db
-      item_create_schema = schemas.ItemCreate(**item.model_dump())
+      item_create_schema = schemas.ItemCreate(**item.__dict__)
       created_item = await crud.create_item(db=db, item=item_create_schema)
-      return created_item
+      return ItemType.from_pydantic(created_item)
 
     @strawberry.mutation
     async def update_item(self, info: Context, item_id: int, item: ItemInput) -> Optional[ItemType]:
@@ -72,10 +78,10 @@ class Query:
       return deleted
 
 
-schemas = strawberry.Schema(query=Query, mutation=Query.Mutation)
+schema = strawberry.Schema(query=Query, mutation=Query.Mutation)
 
 graphql_app = GraphQLRouter(
-    schemas,
+    schema,
     context_getter=get_graphql_context,
     graphiql=True,  # GraphiQL UIを有効にする場合はコメントアウトを外す
 )
