@@ -1,58 +1,52 @@
-from fastapi import FastAPI, Depends, HTTPException
+from fastapi import FastAPI # Remove Depends, HTTPException
+# Remove typing imports if no longer needed by REST endpoints
 from sqlalchemy.ext.asyncio import AsyncSession
-from typing import List, AsyncGenerator
 from contextlib import asynccontextmanager
+import os # Add os
+from dotenv import load_dotenv # Add dotenv
 
-from . import crud, models, schemas, database
-from .database import engine, Base, get_db
+# Load .env file early
+load_dotenv()
+
+# Remove unused imports if REST endpoints are gone
+# from . import crud, models, schemas, database
+from .database import engine, Base # Remove get_db if only used by REST endpoints
 from .graphql_schema import graphql_app
+from fastapi.middleware.cors import CORSMiddleware # Add CORS
 
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
+    # .env から DB リセット設定を読み込む
+    reset_db = os.getenv("RESET_DB_ON_STARTUP", "False").lower() == "true"
+
     async with engine.begin() as conn:
-      # for 開発中のみDBを削除。普段はコメントアウト
-      await conn.run_sync(Base.metadata.drop_all)
-    
-      # DBのテーブルを作成
+      if reset_db:
+          print("RESET_DB_ON_STARTUP is True. Dropping and recreating tables...")
+          # すべてのテーブルを削除 (User, Credential テーブルも含む)
+          await conn.run_sync(Base.metadata.drop_all)
+      else:
+          print("RESET_DB_ON_STARTUP is False. Skipping drop_all.")
+
+      # DBのテーブルを作成 (存在しないテーブルのみ作成される)
       await conn.run_sync(Base.metadata.create_all)
       yield
+    # Shutdown イベントがあればここに記述
 
 app = FastAPI(lifespan=lifespan)
 
+# CORS 設定 (一時的にすべて許可してデバッグ)
+origins = ["*"] # Allow all origins for debugging
+
+# CORS ミドルウェアを追加
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=origins, # Use the wildcard origin
+    allow_credentials=True,
+    allow_methods=["GET", "POST", "OPTIONS"], # Explicitly add OPTIONS
+    allow_headers=["*"],
+)
+
 app.include_router(graphql_app, prefix="/graphql")
 
-
-@app.post("/items/", response_model=schemas.ItemRead, status_code=201)
-async def create_item_endpoint(item: schemas.ItemCreate, db: AsyncSession = Depends(get_db)):
-    # ユニークチェックをすべきだが、ここでは省略
-    return await crud.create_item(db=db, item=item)
-
-
-@app.get("/items/", response_model=List[schemas.ItemRead])
-async def read_items_endpoint(skip: int = 0, limit: int = 100, db: AsyncSession = Depends(get_db)):
-    items = await crud.get_items(db=db, skip=skip, limit=limit)
-    return items
-
-@app.get("/items/{item_id}", response_model=schemas.ItemRead)
-async def read_item_endpoint(item_id: int, db: AsyncSession = Depends(get_db)):
-    db_item = await crud.get_item(db=db, item_id=item_id)
-    if db_item is None:
-        raise HTTPException(status_code=404, detail="Item not found")
-    return db_item
-
-
-@app.delete("/items/{item_id}", status_code=204)
-async def delete_item_endpoint(item_id: int, db: AsyncSession = Depends(get_db)):
-    deleted = await crud.delete_item(db=db, item_id=item_id)
-    if not deleted:
-        raise HTTPException(status_code=404, detail="Item not found")
-    return None
-
-
-@app.put("/items/{item_id}", response_model=schemas.ItemRead)
-async def update_item_endpoint(item_id: int, item_update: schemas.ItemCreate, db: AsyncSession = Depends(get_db)):
-    db_updated_item = await crud.update_item(db=db, item_id=item_id, item_update=item_update)
-    if db_updated_item is None:
-        raise HTTPException(status_code=404, detail="Item not found")
-    return db_updated_item
+# Item 用 REST API エンドポイントは削除

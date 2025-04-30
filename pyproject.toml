@@ -6,10 +6,31 @@ readme = "README.md"
 requires-python = ">=3.11"
 dependencies = [
     "aiosqlite>=0.21.0",
-    "fastapi[standard]>=0.115.12",
+    "fastapi>=0.115.12",      # Removed [standard]
+    "starlette>=0.36.0",     # Added explicitly (FastAPI dependency)
     "greenlet>=3.2.1",
     "pydantic>=2.11.3",
     "sqlalchemy>=2.0.40",
     "strawberry-graphql[fastapi]>=0.266.0",
-    "uvicorn[standard]>=0.34.2",
+    "uvicorn>=0.34.2",        # Removed [standard]
+    "click>=8.0.0",          # Added explicitly (Uvicorn dependency)
+    # Add other potential standard deps if needed, e.g., h11, websockets
+    "h11>=0.14.0",           # Added explicitly (Uvicorn standard)
+    "websockets>=11.0",      # Added explicitly (Uvicorn standard)
+    "watchfiles>=0.19.0",    # Added explicitly (Uvicorn standard for --reload)
+    "python-dotenv>=1.0.0",
+    "fido2>=1.1.2",
+    "PyJWT>=2.8.0",
+    "anyio>=4.0.0",
+    "sniffio>=1.3.0",
+    "pydantic-core>=2.14.1",  # Added explicitly (Pydantic dependency)
+    "typing-extensions>=4.6.0",
+    "annotated-types>=0.4.0",
+    "typing-inspection>=0.4.0",
+    "graphql-core>=3.2.0",
+    "python-dateutil>=2.8.0",
+    "six>=1.16.0",
+    "cryptography>=3.4",
+    "cffi>=1.15.0",           # Added explicitly (cryptography dependency)
 ]
+# Note: python-dotenv was duplicated, keeping one. Removed the comment alias.
